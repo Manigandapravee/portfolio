@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manigandapravi G | Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060c1a;
+    --sky: #0a1628;
+    --accent: #4fc3f7;
+    --gold: #ffd166;
+    --text: #e8f0fe;
+    --muted: #8899bb;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(79,195,247,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── Custom Cursor ── */
+  #cursor-dot {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s;
+    box-shadow: 0 0 12px var(--accent);
+  }
+  #cursor-ring {
+    width: 32px; height: 32px;
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s ease, width 0.2s, height 0.2s;
+    opacity: 0.5;
+  }
+
+  /* ── Bird SVG Canvas ── */
+  #bird-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  /* ── Stars background ── */
+  #stars-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.2rem 3rem;
+    background: rgba(6,12,26,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem; font-weight: 900;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    position: relative; z-index: 1;
+  }
+  .hero-tag {
+    font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+    padding: 0.4rem 1.2rem; border-radius: 50px;
+    display: inline-block;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1.05;
+    animation: fadeUp 0.9s 0.1s ease both;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    margin-top: 1.2rem;
+    font-size: clamp(1rem, 2.5vw, 1.3rem);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.7;
+    animation: fadeUp 1s 0.2s ease both;
+  }
+  .hero-btns {
+    margin-top: 2.5rem;
+    display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 1s 0.3s ease both;
+  }
+  .btn {
+    padding: 0.8rem 2rem; border-radius: 50px; font-size: 0.9rem;
+    font-weight: 500; letter-spacing: 0.5px; cursor: none;
+    transition: all 0.3s; text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent); color: #060c1a;
+  }
+  .btn-primary:hover { background: #81d4fa; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(79,195,247,0.35); }
+  .btn-outline {
+    border: 1.5px solid var(--border); color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  .scroll-hint {
+    margin-top: 4rem;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    color: var(--muted); font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase;
+    animation: fadeUp 1s 0.5s ease both;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollLine 1.5s ease infinite;
+  }
+  @keyframes scrollLine { 0%,100%{opacity:1;transform:scaleY(1)} 50%{opacity:0.3;transform:scaleY(0.5)} }
+
+  /* ── SECTIONS ── */
+  section { position: relative; z-index: 1; padding: 6rem 2rem; }
+  .container { max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.6rem;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700; margin-bottom: 3rem;
+  }
+
+  /* ── ABOUT ── */
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+  }
+  .about-text p { color: var(--muted); line-height: 1.9; font-size: 1.05rem; margin-bottom: 1rem; }
+  .about-stats {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .stat-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--accent); font-weight: 700; }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; letter-spacing: 1px; }
+
+  /* ── SKILLS ── */
+  .skills-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;
+  }
+  .skill-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .skill-card:hover { transform: translateY(-6px); border-color: var(--accent); }
+  .skill-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .skill-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.8rem; color: var(--accent); }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .tag {
+    font-size: 0.75rem; padding: 0.3rem 0.8rem;
+    border-radius: 50px; background: rgba(79,195,247,0.1);
+    border: 1px solid var(--border); color: var(--muted);
+  }
+
+  /* ── PROJECTS ── */
+  .projects-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;
+  }
+  .project-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2rem;
+    transition: transform 0.3s, border-color 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .project-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .project-card:hover { transform: translateY(-8px); border-color: var(--accent); }
+  .project-card:hover::before { opacity: 1; }
+  .project-num { font-family: 'Playfair Display', serif; font-size: 3rem; color: rgba(79,195,247,0.1); font-weight: 900; line-height: 1; }
+  .project-card h3 { font-size: 1.2rem; font-weight: 600; margin: 0.5rem 0; }
+  .project-date { font-size: 0.78rem; color: var(--accent); letter-spacing: 1px; margin-bottom: 1rem; }
+  .project-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; }
+  .project-techs { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.2rem; }
+
+  /* ── CERTS ── */
+  .certs-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.2rem; }
+  .cert-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.4rem 1.6rem;
+    display: flex; align-items: center; gap: 1rem;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .cert-card:hover { transform: translateY(-4px); border-color: var(--gold); }
+  .cert-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .cert-info h4 { font-size: 0.95rem; font-weight: 600; }
+  .cert-info span { font-size: 0.78rem; color: var(--muted); }
+
+  /* ── CONTACT ── */
+  .contact-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 3.5rem;
+    text-align: center; max-width: 640px; margin: 0 auto;
+  }
+  .contact-box h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 1rem; }
+  .contact-box p { color: var(--muted); margin-bottom: 2rem; line-height: 1.7; }
+  .contact-links { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+  .contact-link {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.7rem 1.4rem; border-radius: 50px;
+    border: 1px solid var(--border); color: var(--text);
+    text-decoration: none; font-size: 0.88rem;
+    transition: all 0.3s; cursor: none;
+  }
+  .contact-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 2rem;
+    color: var(--muted); font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    position: relative; z-index: 1;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 60px; height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    margin: 1.5rem 0;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1rem; }
+    .contact-box { padding: 2rem 1.5rem; }
+  }
+
+  /* Glow effect on hover for interactive elements */
+  a:not(.btn):not(.contact-link):not(.nav-links a) { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- Cursors -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Star canvas -->
+<canvas id="stars-canvas"></canvas>
+
+<!-- Bird canvas -->
+<canvas id="bird-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">MG</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#certs">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">✦ AI & ML Engineer ✦</div>
+  <h1>Maniganda<span>pravi</span> G</h1>
+  <p class="hero-sub">
+    B.Tech CSE student specializing in AI & Machine Learning at SRMIST. Turning raw data into meaningful insights, one project at a time.
+  </p>
+  <div class="hero-btns">
+    <a href="#projects" class="btn btn-primary">View Projects</a>
+    <a href="#contact" class="btn btn-outline">Get in Touch</a>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="section-label">01 / About</div>
+    <h2 class="section-title">Who I Am</h2>
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <p>I'm an aspiring Computer Science Engineer specializing in <strong>Artificial Intelligence and Machine Learning</strong> at SRM Institute of Science and Technology, Chennai.</p>
+        <p>I'm enthusiastic about data analytics and enjoy turning raw data into meaningful insights. I value practical, hands-on problem solving over purely theoretical knowledge.</p>
+        <p>With strong attention to detail and a commitment to excellence, I aim to apply my technical skills to create innovative and impactful solutions.</p>
+        <div class="divider"></div>
+      </div>
+      <div class="about-stats">
+        <div class="stat-card">
+          <div class="stat-num">3+</div>
+          <div class="stat-label">Projects Built</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">4+</div>
+          <div class="stat-label">Certifications</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">7.6</div>
+          <div class="stat-label">CGPA / 10</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">2026</div>
+          <div class="stat-label">Graduating</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills" style="background: rgba(79,195,247,0.02);">
+  <div class="container">
+    <div class="section-label">02 / Skills</div>
+    <h2 class="section-title">What I Work With</h2>
+    <div class="skills-grid">
+      <div class="skill-card reveal">
+        <div class="skill-icon">💻</div>
+        <h3>Programming</h3>
+        <div class="skill-tags">
+          <span class="tag">Python</span>
+          <span class="tag">SQL</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-icon">🌐</div>
+        <h3>Web & Frameworks</h3>
+        <div class="skill-tags">
+          <span class="tag">HTML</span>
+          <span class="tag">CSS</span>
+          <span class="tag">Django</span>
+          <span class="tag">MERN</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-icon">☁️</div>
+        <h3>Tools & Cloud</h3>
+        <div class="skill-tags">
+          <span class="tag">AWS</span>
+          <span class="tag">Docker</span>
+          <span class="tag">Jenkins</span>
+          <span class="tag">Terraform</span>
+          <span class="tag">VS Code</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-icon">📊</div>
+        <h3>Data & Analytics</h3>
+        <div class="skill-tags">
+          <span class="tag">MS Excel</span>
+          <span class="tag">Power BI</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-icon">🎨</div>
+        <h3>Design Tools</h3>
+        <div class="skill-tags">
+          <span class="tag">Figma</span>
+          <span class="tag">Canva</span>
+          <span class="tag">Adobe Photoshop</span>
+          <span class="tag">WordPress</span>
+        </div>
+      </div>
+      <div class="skill-card reveal">
+        <div class="skill-icon">🤖</div>
+        <h3>Interests</h3>
+        <div class="skill-tags">
+          <span class="tag">Machine Learning</span>
+          <span class="tag">Data Analytics</span>
+          <span class="tag">UI/UX Design</span>
+          <span class="tag">Cloud Computing</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <div class="section-label">03 / Projects</div>
+    <h2 class="section-title">Things I've Built</h2>
+    <div class="projects-grid">
+
+      <div class="project-card reveal">
+        <div class="project-num">01</div>
+        <h3>Smart Learning Management System</h3>
+        <div class="project-date">Jan 2024 – Mar 2024</div>
+        <p>Web-based LMS using Django and SQLite3 allowing students to register, enroll in courses, and submit assignments. Features an admin interface to manage courses, track enrollments, assign tasks, and monitor student activity.</p>
+        <div class="project-techs">
+          <span class="tag">Django</span>
+          <span class="tag">SQLite3</span>
+          <span class="tag">Python</span>
+          <span class="tag">HTML/CSS</span>
+        </div>
+         <div class="project-links"></div>
+         <a href="https://github.com/Manigandapravee/smart-learning-management-system" target="_blank" class="project-link-btn btn-github">⬡ GitHub</a>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-num">02</div>
+        <h3>NFC Healthcare System</h3>
+        <div class="project-date">Jan 2025 – May 2025</div>
+        <p>Python-based NFC Healthcare system enabling instant patient data access via NFC card scanning and OCR-based prescription digitization. Automated PDF report generation and email dispatch, improving medical workflow efficiency.</p>
+        <div class="project-techs">
+          <span class="tag">Python</span>
+          <span class="tag">NFC</span>
+          <span class="tag">OCR</span>
+          <span class="tag">PDF Gen</span>
+        </div>
+        <div class="project-links"></div>
+        <a href="https://github.com/Manigandapravee/NFC-Healthcare" target="_blank" class="project-link-btn btn-github">⬡ GitHub</a>
+      </div>
+
+      <div class="project-card reveal">
+        <div class="project-num">03</div>
+        <h3>Family Expense Tracker</h3>
+        <div class="project-date">Jul 2025 – Nov 2025</div>
+        <p>Smart MERN web app to split and track daily expenses with secure login and role-based access using JWT Auth. Automated deployment using Docker, Terraform, and Jenkins CI/CD on AWS for fast and smooth updates.</p>
+        <div class="project-techs">
+          <span class="tag">MERN</span>
+          <span class="tag">JWT</span>
+          <span class="tag">Docker</span>
+          <span class="tag">AWS</span>
+          <span class="tag">CI/CD</span>
+        </div>
+        <div class="project-links"></div>
+        <a href="https://github.com/Manigandapravee/Family-Expense-Tracker-Web-App" target="_blank" class="project-link-btn btn-github">⬡ GitHub</a>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-num">04</div>
+        <h3>Secure AI Digital Twin for Predicting Machine Failures in Smart Industry</h3>
+        <div class="project-date">Jan 2026 – May 2026</div>
+        <p>AI-Powered Industrial IOT system for predictive maintenance using Fedrated Learning, Blockchain security, and Vision-enabled Digital Twin Technology.The system analyzes machine sensor data and machine surface images to predict failures,estimation Remaining Useful  Life (RUL), and detect defects in real time While ensuring secure and decentralized indutrail data sharing.</p>
+      <div class="project-techs">
+          <span class="tag">Python</span>
+          <span class="tag">Fedrated learning</span>
+          <span class="tag">Blockchain</span>
+          <span class="tag">CNN</span>
+          <span class="tag">Flask</span>
+        </div>
+        <div class="project-links"></div>
+        <a href="https://github.com/Manigandapravee/SecureAIDigitalTwinForPredicting-Machine-Failures-In-Smart-Industry" target="_blank" class="project-link-btn btn-github">⬡ GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certs" style="background: rgba(79,195,247,0.02);">
+  <div class="container">
+    <div class="section-label">04 / Certifications</div>
+    <h2 class="section-title">Credentials</h2>
+    <div class="certs-list reveal">
+      <div class="cert-card">
+        <div class="cert-icon">🟠</div>
+        <div class="cert-info">
+          <h4>Machine Learning Foundations</h4>
+          <span>AWS · Feb 2024</span><br>
+          <a href="https://drive.google.com/file/d/1jbWwcNk8jttd7QBPf-IXU7Nqzqspnj8O/view?usp=drive_link" target="_blank" class="cert-link-btn">🔗 View Certificate</a>
+        </div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-icon">🔴</div>
+        <div class="cert-info">
+          <h4>Oracle Certified Foundations Associate</h4>
+          <span>Oracle · Feb 2025</span><br>
+          <a href="https://drive.google.com/file/d/17d31JT5bNqo5D27KctL_pFbEinW_-lUx/view?usp=drive_link" target="_blank" class="cert-link-btn">🔗 View Certificate</a>
+        </div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-icon">🟢</div>
+        <div class="cert-info">
+          <h4>Getting Started with Microsoft Excel</h4>
+          <span>Coursera · Feb 2025</span><br>
+           <a href="https://drive.google.com/file/d/17YbLBC-pH9ZSeNKBhgaLL9spqA2plREn/view?usp=sharing" target="_blank" class="cert-link-btn">🔗 View Certificate</a>
+        </div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-icon">🔵</div>
+        <div class="cert-info">
+          <h4>Data Analytics Essentials</h4>
+          <span>IBM · Dec 2025</span><br>
+          <a href="https://drive.google.com/file/d/1wrqjzeoCGCXw_f0EV4LMznMUv602ujuR/view?usp=sharing" target="_blank" class="cert-link-btn">🔗 View Certificate</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="container">
+    <div class="section-label">05 / Contact</div>
+    <div class="contact-box reveal">
+      <h2>Let's Connect 🚀</h2>
+      <p>I'm always open to discussing new opportunities, collaborations, or just having a great conversation about AI, data, and tech.</p>
+      <div class="contact-links">
+        <a href="mailto:manigandapravi@gmail.com" class="contact-link">📧 Email Me</a>
+        <a href="https://www.linkedin.com/in/manigandapravi" target="_blank" class="contact-link">💼 LinkedIn</a>
+        <a href="https://github.com/Manigandapravee" target="_blank" class="contact-link">🐱 GitHub</a>
+        <a href="https://www.hackerrank.com/profile/manigandapravi" target="_blank" class="contact-link">💡 HackerRank</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>✦ Crafted with passion by <strong>Manigandapravi G</strong> · 2026 ✦</p>
+</footer>
+
+<script>
+// ── STARS ──
+const starsCanvas = document.getElementById('stars-canvas');
+const sCtx = starsCanvas.getContext('2d');
+let stars = [];
+function resizeStars() {
+  starsCanvas.width = window.innerWidth;
+  starsCanvas.height = window.innerHeight;
+}
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 180; i++) {
+    stars.push({
+      x: Math.random() * starsCanvas.width,
+      y: Math.random() * starsCanvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      alpha: Math.random(),
+      speed: Math.random() * 0.005 + 0.002,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+}
+function drawStars(t) {
+  sCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+  stars.forEach(s => {
+    const a = 0.3 + 0.7 * Math.abs(Math.sin(t * s.speed + s.phase));
+    sCtx.beginPath();
+    sCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    sCtx.fillStyle = `rgba(200,230,255,${a})`;
+    sCtx.fill();
+  });
+}
+resizeStars(); initStars();
+window.addEventListener('resize', () => { resizeStars(); initStars(); });
+
+// ── BIRD CURSOR ──
+const birdCanvas = document.getElementById('bird-canvas');
+const bCtx = birdCanvas.getContext('2d');
+birdCanvas.width = window.innerWidth;
+birdCanvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  birdCanvas.width = window.innerWidth;
+  birdCanvas.height = window.innerHeight;
+});
+
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+let birdX = mouseX, birdY = mouseY;
+let birdAngle = 0;
+let wingPhase = 0;
+let trail = [];
+
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  dot.style.left = mouseX + 'px';
+  dot.style.top = mouseY + 'px';
+  ring.style.left = mouseX + 'px';
+  ring.style.top = mouseY + 'px';
+});
+
+function drawBird(x, y, angle, wingFlap, size, alpha) {
+  bCtx.save();
+  bCtx.translate(x, y);
+  bCtx.rotate(angle);
+  bCtx.globalAlpha = alpha;
+
+  const wing = Math.sin(wingFlap) * 0.6; // wing angle
+  const color = `rgba(79,195,247,${alpha})`;
+  const glow = `rgba(79,195,247,${alpha * 0.3})`;
+
+  // Glow
+  bCtx.shadowColor = '#4fc3f7';
+  bCtx.shadowBlur = 10 * alpha;
+
+  // Body
+  bCtx.beginPath();
+  bCtx.ellipse(0, 0, size * 0.7, size * 0.25, 0, 0, Math.PI * 2);
+  bCtx.fillStyle = color;
+  bCtx.fill();
+
+  // Left wing
+  bCtx.save();
+  bCtx.rotate(-wing);
+  bCtx.beginPath();
+  bCtx.moveTo(-size * 0.1, 0);
+  bCtx.quadraticCurveTo(-size * 0.8, -size * 0.6 * Math.max(0.1, 1 - wing), -size * 1.2, size * 0.1);
+  bCtx.quadraticCurveTo(-size * 0.5, 0.1, -size * 0.1, 0);
+  bCtx.fillStyle = color;
+  bCtx.fill();
+  bCtx.restore();
+
+  // Right wing
+  bCtx.save();
+  bCtx.rotate(wing);
+  bCtx.scale(1, -1);
+  bCtx.beginPath();
+  bCtx.moveTo(-size * 0.1, 0);
+  bCtx.quadraticCurveTo(-size * 0.8, -size * 0.6 * Math.max(0.1, 1 - wing), -size * 1.2, size * 0.1);
+  bCtx.quadraticCurveTo(-size * 0.5, 0.1, -size * 0.1, 0);
+  bCtx.fillStyle = color;
+  bCtx.fill();
+  bCtx.restore();
+
+  // Tail
+  bCtx.beginPath();
+  bCtx.moveTo(-size * 0.6, 0);
+  bCtx.lineTo(-size * 1.1, -size * 0.2);
+  bCtx.lineTo(-size * 1.1, size * 0.2);
+  bCtx.closePath();
+  bCtx.fillStyle = color;
+  bCtx.fill();
+
+  // Head
+  bCtx.beginPath();
+  bCtx.arc(size * 0.55, 0, size * 0.22, 0, Math.PI * 2);
+  bCtx.fillStyle = color;
+  bCtx.fill();
+
+  // Eye
+  bCtx.beginPath();
+  bCtx.arc(size * 0.63, -size * 0.05, size * 0.055, 0, Math.PI * 2);
+  bCtx.fillStyle = '#060c1a';
+  bCtx.fill();
+
+  // Beak
+  bCtx.beginPath();
+  bCtx.moveTo(size * 0.75, -size * 0.03);
+  bCtx.lineTo(size * 0.98, 0);
+  bCtx.lineTo(size * 0.75, size * 0.06);
+  bCtx.closePath();
+  bCtx.fillStyle = '#ffd166';
+  bCtx.fill();
+
+  bCtx.shadowBlur = 0;
+  bCtx.restore();
+}
+
+let t = 0;
+function animate() {
+  t++;
+  wingPhase += 0.18;
+
+  // Smooth follow
+  const speed = 0.12;
+  const dx = mouseX - birdX;
+  const dy = mouseY - birdY;
+  birdX += dx * speed;
+  birdY += dy * speed;
+
+  // Angle toward target
+  const targetAngle = Math.atan2(dy, dx);
+  let da = targetAngle - birdAngle;
+  while (da > Math.PI) da -= Math.PI * 2;
+  while (da < -Math.PI) da += Math.PI * 2;
+  birdAngle += da * 0.1;
+
+  // Trail
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > 5) {
+    trail.push({ x: birdX, y: birdY, t: t });
+  }
+  trail = trail.filter(p => t - p.t < 18);
+
+  bCtx.clearRect(0, 0, birdCanvas.width, birdCanvas.height);
+
+  drawStars(t);
+
+  // Draw trail birds (smaller, fading)
+  for (let i = 0; i < trail.length; i += 3) {
+    const p = trail[i];
+    const age = t - p.t;
+    const alpha = (1 - age / 18) * 0.25;
+    const s = 8 * (1 - age / 18);
+    drawBird(p.x, p.y, birdAngle, wingPhase - i * 0.1, s, alpha);
+  }
+
+  // Main bird
+  drawBird(birdX, birdY, birdAngle, wingPhase, 14, 1);
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ── SCROLL REVEAL ──
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
