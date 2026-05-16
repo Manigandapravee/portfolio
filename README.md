@@ -38,8 +38,9 @@ MERN stack application for tracking and splitting daily expenses with JWT authen
 
 AI-powered Industrial IoT system using Federated Learning, Blockchain security, and Vision-enabled Digital Twin technology for predictive maintenance and machine failure detection.
 
+### 🔹 Portfolio Website Link
+https://manigandapravi.netlify.app
 
-```
 
 ## 📌 Installation
 
